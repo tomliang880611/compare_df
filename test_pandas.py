@@ -34,6 +34,12 @@ class ColumnPreProcessor():
         return fn
 
 
+class CompareConfig():
+    column_suffixes = ('_src', '_target')
+    def __init__(self):
+        pass
+
+
 def handle_column_proprocessor(df, processor):
     trans_fn = processor.get_transform_fn()
     tmp = df[processor.col_name]
@@ -42,6 +48,10 @@ def handle_column_proprocessor(df, processor):
             lambda x: trans_fn(x))
     else:
         df[processor.to_col_name] = tmp
+
+
+def get_select_keys():
+    return ['A', 'B', 'value_src', 'value_target']
 
 
 target_preprocessor = ColumnPreProcessor("A1", "A")
@@ -57,4 +67,9 @@ target_df = pd.read_csv('./testdata_target.csv')
 handle_column_proprocessor(target_df, target_preprocessor)
 handle_column_proprocessor(target_df, target_preprocessor2)
 
-pd.merge(src_df, target_df, on=['A', 'B'])
+merged_df = pd.merge(src_df,
+                     target_df, on=['A', 'B'],
+                     suffixes=('_src', '_target'))
+
+select_keys = get_select_keys()
+merged_df[select_keys]

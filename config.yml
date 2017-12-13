@@ -1,0 +1,17 @@
+# configuation for comparison
+
+config:
+  value_column: value
+  src:
+    column:
+      - name: A2
+        to_name: A
+        filters:
+          - x.startswith('prefix_')
+        transforms:
+          - x.lstrip('prefix_')
+
+      - name: B2
+        to_name: B
+          
+
