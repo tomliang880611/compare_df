@@ -36,13 +36,13 @@ class ColumnPreProcessor():
 
 class CompareConfig():
     column_suffixes = ('_src', '_target')
-    compare_value_column = 'value'
+    _compare_value_column = 'value'
     src_processors = []
     target_processors = []
 
     def __init__(self,
                  compare_column='value'):
-        self.compare_value_column = compare_column
+        self._compare_value_column = compare_column
         # if(not (src and target)):
         #     raise ValueError('src and target file path should be specified.')
 
@@ -90,11 +90,11 @@ class CompareConfig():
     def get_compare_columns(self):
         select_keys_list = []
         for k in self.column_suffixes:
-            select_keys_list.append(self.compare_value_column + k)
+            select_keys_list.append(self._compare_value_column + k)
         return select_keys_list
 
     def get_result_value_column(self):
-        return self.compare_value_column + "_diff"
+        return self._compare_value_column + "_diff"
 
     def get_result_columns(self):
         result_columns = []
@@ -102,6 +102,11 @@ class CompareConfig():
         result_columns.extend(config.get_compare_columns())
         result_columns.extend([config.get_result_value_column()])
         return result_columns
+
+def handle_column_proprocessors(df, processors):
+    if(len(processors) > 0):
+        for p in processors:
+            handle_column_proprocessor(df, p)
 
 
 def handle_column_proprocessor(df, processor):
@@ -125,12 +130,13 @@ config.append_processor('A1',
                         src_flag=False)
 config.append_processor('B2', to_column='B', src_flag=False)
 
-for processor in config.target_processors:
-    handle_column_proprocessor(target_df2, processor)
+handle_column_proprocessors(target_df2, config.target_processors)
+handle_column_proprocessors(src_df2, config.src_processors)
 
 merged_df2 = pd.merge(src_df2, target_df2,
                       on=config.get_join_columns(),
-                      suffixes=config.column_suffixes)
+                      suffixes=config.column_suffixes,
+                      how="outer")
 merged_df2[config.get_result_value_column()]\
     = merged_df2[config.get_compare_columns()[0]] == \
     merged_df2[config.get_compare_columns()[1]]
