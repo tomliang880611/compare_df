@@ -120,7 +120,6 @@ def handle_column_proprocessor(df, processor):
 
 
 def compare_column_value(row):
-    print(type(row))
     src = row[config.get_compare_columns()[0]]
     target = row[config.get_compare_columns()[1]]
 
@@ -190,7 +189,10 @@ merged_df2[config.get_result_columns()]
 #     merged_df[select_keys]
 
 
-selected = merged_df2[['value_src', 'value_target', 'value_diff']]
+selected = merged_df2[['value_src', 'value_target', 'value_diff', 'A']]
 selected['value_name'] = 'attribute123'
-
-selected.groupby(['value_name', 'value_diff']).count()
+selected2 = selected[['value_name', 'value_diff', 'A']]
+selected3 = selected2.groupby(['value_name', 'value_diff']).count()
+selected3.pivot('value_diff')
+selected3
+selected.groupby(levels=['value_name', 'value_diff']).count()
