@@ -119,6 +119,21 @@ def handle_column_proprocessor(df, processor):
         df[processor.to_col_name] = tmp
 
 
+def compare_column_value(row):
+    print(type(row))
+    src = row[config.get_compare_columns()[0]]
+    target = row[config.get_compare_columns()[1]]
+
+    if(pd.isna(src)):
+        return "missing_src"
+    if(pd.isna(target)):
+        return "missing_target"
+    if(src == target):
+        return "equal"
+    if(src != target):
+        return "not equal"
+
+
 # renovation
 src_df2 = pd.read_csv('./testdata.csv')
 target_df2 = pd.read_csv('./testdata_target.csv')
@@ -137,10 +152,13 @@ merged_df2 = pd.merge(src_df2, target_df2,
                       on=config.get_join_columns(),
                       suffixes=config.column_suffixes,
                       how="outer")
-merged_df2[config.get_result_value_column()]\
-    = merged_df2[config.get_compare_columns()[0]] == \
-    merged_df2[config.get_compare_columns()[1]]
 
+# merged_df2[config.get_result_value_column()]\
+#     = merged_df2[config.get_compare_columns()[0]] == \
+#     merged_df2[config.get_compare_columns()[1]]
+
+merged_df2[config.get_result_value_column()] = merged_df2.apply(
+    compare_column_value, axis=1)
 merged_df2[config.get_result_columns()]
 
 
@@ -170,3 +188,9 @@ merged_df2[config.get_result_columns()]
 
 #     select_keys = get_select_keys()
 #     merged_df[select_keys]
+
+
+selected = merged_df2[['value_src', 'value_target', 'value_diff']]
+selected['value_name'] = 'attribute123'
+
+selected.groupby(['value_name', 'value_diff']).count()
